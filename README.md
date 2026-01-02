@@ -1,18 +1,40 @@
-# Salesforce DX Project: Next Steps
+# Invoice Management System (Salesforce Apex)
 
-Now that you’ve created a Salesforce DX project, what’s next? Here are some documentation resources to get you started.
+This Salesforce project demonstrates a simple invoice management system using Apex triggers, batch classes, and HTTP callouts. It includes test classes and mock callouts for proper testing.
 
-## How Do You Plan to Deploy Your Changes?
+---
 
-Do you want to deploy a set of changes, or create a self-contained application? Choose a [development model](https://developer.salesforce.com/tools/vscode/en/user-guide/development-models).
+## Project Structure
 
-## Configure Your Salesforce DX Project
+### 1. `InvoiceTriggerHandler`
+Handles the logic after inserting new invoices.  
+- Filters invoices with `Status__c = 'Pending'`.  
+- Executes the `InvoiceBatch` to send pending invoices.
 
-The `sfdx-project.json` file contains useful configuration information for your project. See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm) in the _Salesforce DX Developer Guide_ for details about this file.
+### 2. `InvoiceTrigger`
+A trigger on `Invoice__c` (after insert) that calls `InvoiceTriggerHandler.handleAfterInsert`.
 
-## Read All About It
+### 3. `InvoiceBatch`
+A batch class that processes a list of invoices.  
+- Sends each invoice to an external endpoint via HTTP POST.  
+- Updates the invoice status to `'Sent'`.  
+- Implements `Database.Batchable<SObject>` methods: `start`, `execute`, and `finish`.
 
-- [Salesforce Extensions Documentation](https://developer.salesforce.com/tools/vscode/)
-- [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
-- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_intro.htm)
-- [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm)
+### 4. `TestDataFactory`
+A helper class to generate test invoices.  
+- Method: `createInvoices(Integer count, String status)`  
+- Creates and inserts a list of invoices with the given status.
+
+### 5. `InvoiceTest`
+Test class for the invoice system.  
+- Tests normal batch processing.  
+- Tests invoices that are not pending.  
+- Tests batch with HTTP callout using a mock.
+
+### 6. `MockAccountingCallout`
+A mock class for HTTP callouts during tests.  
+- Implements `HttpCalloutMock`.  
+- Returns a successful JSON response with status 200.
+
+---
+
